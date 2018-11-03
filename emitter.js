@@ -63,8 +63,8 @@ function getEmitter() {
                     events[event].forEach(element => {
                         if (element.times > 0 && element.count % element.frequency === 0) {
                             element.handler.call(element.context);
+                            element.times--;
                         }
-                        element.times--;
                         element.count++;
                     });
                 }
@@ -84,7 +84,7 @@ function getEmitter() {
          * @returns {Object} this
          */
         several: function (event, context, handler, times) {
-            if (events[event]) {
+            if (!events[event]) {
                 events[event] = [];
             }
             events[event].push(announceEvent(context, handler, times));
@@ -102,10 +102,10 @@ function getEmitter() {
          * @returns {Object} this
          */
         through: function (event, context, handler, frequency) {
-            if (events[event]) {
+            if (!events[event]) {
                 events[event] = [];
             }
-            events[event].push(announceEvent(context, handler, frequency));
+            events[event].push(announceEvent(context, handler, Infinity, frequency));
 
             return this;
         }
