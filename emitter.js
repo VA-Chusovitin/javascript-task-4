@@ -13,9 +13,14 @@ const isStar = true;
 function getEmitter() {
     let events = {};
 
-    function announceEvent(context, handler, times = Infinity, frequency = 1) {
-        return { 'context': context, 'handler': handler, 'times': times,
-            'frequency': frequency, 'count': 0 };
+    function createEvent(context, handler, times = Infinity, frequency = 1) {
+        return { context, handler, times, frequency, count: 0 };
+    }
+
+    function checkExistenceEvent(event) {
+        if (!events[event]) {
+            events[event] = [];
+        }
     }
 
     return {
@@ -28,10 +33,8 @@ function getEmitter() {
          * @returns {Object} this
          */
         on: function (event, context, handler) {
-            if (!events[event]) {
-                events[event] = [];
-            }
-            events[event].push(announceEvent(context, handler));
+            checkExistenceEvent(event);
+            events[event].push(createEvent(context, handler));
 
             return this;
         },
@@ -59,7 +62,7 @@ function getEmitter() {
          */
         emit: function (event) {
             do {
-                if (event in events) {
+                if (events.hasOwnProperty(event)) {
                     events[event].forEach(element => {
                         if (element.times > 0 && element.count % element.frequency === 0) {
                             element.handler.call(element.context);
@@ -84,10 +87,8 @@ function getEmitter() {
          * @returns {Object} this
          */
         several: function (event, context, handler, times) {
-            if (!events[event]) {
-                events[event] = [];
-            }
-            events[event].push(announceEvent(context, handler, times));
+            checkExistenceEvent(event);
+            events[event].push(createEvent(context, handler, times));
 
             return this;
         },
@@ -102,10 +103,8 @@ function getEmitter() {
          * @returns {Object} this
          */
         through: function (event, context, handler, frequency) {
-            if (!events[event]) {
-                events[event] = [];
-            }
-            events[event].push(announceEvent(context, handler, Infinity, frequency));
+            checkExistenceEvent(event);
+            events[event].push(createEvent(context, handler, Infinity, frequency));
 
             return this;
         }
